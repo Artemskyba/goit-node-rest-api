@@ -1,17 +1,21 @@
 const Joi = require("joi");
 
 const contactJoiSchema = Joi.object({
-  name: Joi.string().max(15).required(),
-  email: Joi.string().email({
-    minDomainSegments: 2,
-    tlds: { allow: ["com", "net"] },
-  }),
-  phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
+  name: Joi.string().max(30).required(),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net"] },
+    })
+    .required(),
+  phone: Joi.string()
+    .pattern(/^\(\d{3}\) \d{3}-\d{4}$/)
+    .required(),
   favorite: Joi.boolean(),
 });
 
 const updateJoiSchema = Joi.object({
-  name: Joi.string().max(15),
+  name: Joi.string().max(30),
   email: Joi.string().email({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net"] },

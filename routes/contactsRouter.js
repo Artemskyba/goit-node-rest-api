@@ -1,37 +1,56 @@
-const contactsRouter = require("express").Router();
-const validateContactMiddleware = require("../middlewares/validateContactMiddleware.js");
-const Contacts = require("../controllers/contactsControllers.js");
-const validateId = require("../middlewares/validateId");
+const { Router } = require("express");
+const {
+  validateUserId,
+  joiValidateDataMiddleware,
+  validateCreateDataMiddleware,
+  updateContactMiddleware,
+  updateFavoriteMiddleware,
+} = require("../middlewares/contactMidlewares.js");
+
 const {
   contactJoiSchema,
   updateJoiSchema,
   updateStatusJoiSchema,
 } = require("../schemas/contactsJoiSchema.js");
 
-contactsRouter.get("/", Contacts.getAllContacts);
+const {
+  getContactsList,
+  getContactById,
+  deleteContact,
+  createContact,
+  updateContact,
+  updateStatusContact,
+} = require("../controllers/contactsControllers.js");
 
-contactsRouter.get("/:id", validateId, Contacts.getContactById);
+const router = Router();
 
-contactsRouter.delete("/:id", validateId, Contacts.deleteContact);
+router
+  .route("/")
+  .get(getContactsList)
+  .post(
+    joiValidateDataMiddleware(contactJoiSchema),
+    validateCreateDataMiddleware,
+    createContact
+  );
 
-contactsRouter.post(
-  "/",
-  validateContactMiddleware(contactJoiSchema),
-  Contacts.createContact
-);
+router.use("/:id", validateUserId);
 
-contactsRouter.patch(
-  "/:id",
-  validateId,
-  validateContactMiddleware(updateJoiSchema),
-  Contacts.updateContact
-);
+router
+  .route("/:id")
+  .get(getContactById)
+  .delete(deleteContact)
+  .patch(
+    joiValidateDataMiddleware(updateJoiSchema),
+    updateContactMiddleware,
+    updateContact
+  );
 
-contactsRouter.patch(
-  "/:id/favorite",
-  validateId,
-  validateContactMiddleware(updateStatusJoiSchema),
-  Contacts.updateStatusContact
-);
+router
+  .route("/:id/favorite")
+  .patch(
+    joiValidateDataMiddleware(updateStatusJoiSchema),
+    updateFavoriteMiddleware,
+    updateStatusContact
+  );
 
-module.exports = contactsRouter;
+module.exports = router;
