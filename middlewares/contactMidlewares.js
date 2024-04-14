@@ -1,31 +1,28 @@
+const asyncHandler = require("express-async-handler");
 const { isValidObjectId } = require("mongoose");
 const {
   getOneById,
   createNew,
-  update,
+  updateData,
 } = require("../services/contactsServices");
 
-const validateUserId = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    if (!isValidObjectId(id))
-      res.status(400).json({
-        code: 400,
-        message: `User with ID ${id} not found...`,
-      });
+const validateUserId = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id))
+    res.status(400).json({
+      code: 400,
+      message: `User with ID ${id} not found...`,
+    });
 
-    const contact = await getOneById(id);
-    if (!contact)
-      res.status(400).json({
-        code: 400,
-        message: `User with ID ${id} not found...`,
-      });
-    req.contact = contact;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+  const contact = await getOneById(id);
+  if (!contact)
+    res.status(400).json({
+      code: 400,
+      message: `User with ID ${id} not found...`,
+    });
+  req.contact = contact;
+  next();
+});
 
 const joiValidateDataMiddleware = (JoiSchema) => {
   return (req, res, next) => {
@@ -41,53 +38,32 @@ const joiValidateDataMiddleware = (JoiSchema) => {
   };
 };
 
-const validateCreateDataMiddleware = async (req, res, next) => {
-  try {
-    const { name, favorite } = req.body;
-    if (!name || !favorite) {
-      res.status(400);
-      throw new Error("Please provide all required fields (name and favorite");
-    }
-    const newContact = await createNew(req.body);
-    req.contact = newContact;
-    next();
-  } catch (error) {
-    next(error);
+const validateCreateDataMiddleware = asyncHandler(async (req, res, next) => {
+  const { name, favorite } = req.body;
+  if (!name || !favorite) {
+    res.status(400);
+    throw new Error("Please provide all required fields (name and favorite");
   }
-};
 
-const updateContactMiddleware = async (req, res, next) => {
-  try {
-    const {
-      params: { id },
-      body,
-    } = req;
-    const updatedContact = await update(id, body);
-    req.contact = updatedContact;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+  const newContact = await createNew(req.body);
+  req.contact = newContact;
+  next();
+});
 
-const updateFavoriteMiddleware = async (req, res, next) => {
-  try {
-    const {
-      params: { id },
-      body,
-    } = req;
-    const updatedContact = await update(id, body);
-    req.contact = updatedContact;
-    next();
-  } catch (error) {
-    next(error);
-  }
-};
+const updateContactMiddleware = asyncHandler(async (req, res, next) => {
+  const {
+    params: { id },
+    body,
+  } = req;
+
+  const updatedContact = await updateData(id, body);
+  req.contact = updatedContact;
+  next();
+});
 
 module.exports = {
   validateUserId,
   joiValidateDataMiddleware,
   validateCreateDataMiddleware,
   updateContactMiddleware,
-  updateFavoriteMiddleware,
 };

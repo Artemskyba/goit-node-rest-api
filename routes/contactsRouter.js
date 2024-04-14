@@ -4,7 +4,6 @@ const {
   joiValidateDataMiddleware,
   validateCreateDataMiddleware,
   updateContactMiddleware,
-  updateFavoriteMiddleware,
 } = require("../middlewares/contactMidlewares.js");
 
 const {
@@ -49,7 +48,7 @@ router
   .route("/:id/favorite")
   .patch(
     joiValidateDataMiddleware(updateStatusJoiSchema),
-    updateFavoriteMiddleware,
+    updateContactMiddleware,
     updateStatusContact
   );
 

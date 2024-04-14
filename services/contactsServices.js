@@ -8,14 +8,7 @@ const deleteById = async (id) => await ContactModel.findByIdAndDelete(id);
 
 const createNew = async (data) => await ContactModel.create({ ...data });
 
-const update = async (id, data) =>
-  await ContactModel.findByIdAndUpdate(
-    id,
-    { ...data },
-    { runValidators: true, new: true }
-  );
-
-const updateFavorite = async (id, data) =>
+const updateData = async (id, data) =>
   await ContactModel.findByIdAndUpdate(
     id,
     { ...data },
@@ -27,6 +20,5 @@ module.exports = {
   getOneById,
   deleteById,
   createNew,
-  update,
-  updateFavorite,
+  updateData,
 };
