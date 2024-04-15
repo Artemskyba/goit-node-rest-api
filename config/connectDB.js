@@ -1,8 +1,10 @@
-const { connect } = require("mongoose");
-require("colors");
+import "dotenv/config";
+const { MONGODB_URL } = process.env;
+import { connect } from "mongoose";
+import "colors";
 const connectDB = async () => {
   try {
-    const db = await connect(process.env.MONGODB_URL);
+    const db = await connect(MONGODB_URL);
     console.log(
       `Database connection successful. NAME: ${db.connection.name}. HOST: ${db.connection.host} PORT: ${db.connection.port}`
         .green.italic.bold
@@ -13,4 +15,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+export default connectDB;

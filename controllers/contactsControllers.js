@@ -1,10 +1,10 @@
-const asyncHandler = require("express-async-handler");
-const {
+import asyncHandler from "express-async-handler";
+import {
   getContactListService,
   deleteById,
-} = require("../services/contactsServices");
+} from "../services/contactsServices.js";
 
-const getContactsList = asyncHandler(async (req, res) => {
+export const getContactsList = asyncHandler(async (req, res) => {
   const contacts = await getContactListService();
 
   res.status(200).json({
@@ -15,7 +15,7 @@ const getContactsList = asyncHandler(async (req, res) => {
   });
 });
 
-const getContactById = asyncHandler(async (req, res) => {
+export const getContactById = asyncHandler(async (req, res) => {
   const { contact } = req;
   res.status(200).json({
     code: 200,
@@ -24,7 +24,7 @@ const getContactById = asyncHandler(async (req, res) => {
   });
 });
 
-const deleteContact = asyncHandler(async (req, res) => {
+export const deleteContact = asyncHandler(async (req, res) => {
   const deletedContact = await deleteById(req.contact.id);
 
   res.status(200).json({
@@ -34,7 +34,7 @@ const deleteContact = asyncHandler(async (req, res) => {
   });
 });
 
-const createContact = asyncHandler(async (req, res) => {
+export const createContact = asyncHandler(async (req, res) => {
   const { contact } = req;
   res.status(201).json({
     code: 201,
@@ -43,7 +43,7 @@ const createContact = asyncHandler(async (req, res) => {
   });
 });
 
-const updateContact = asyncHandler(async (req, res) => {
+export const updateContact = asyncHandler(async (req, res) => {
   const { contact } = req;
   res.status(200).json({
     code: 200,
@@ -52,7 +52,7 @@ const updateContact = asyncHandler(async (req, res) => {
   });
 });
 
-const updateStatusContact = asyncHandler(async (req, res) => {
+export const updateStatusContact = asyncHandler(async (req, res) => {
   const { contact } = req;
   res.status(200).json({
     code: 200,
@@ -60,12 +60,3 @@ const updateStatusContact = asyncHandler(async (req, res) => {
     data: contact,
   });
 });
-
-module.exports = {
-  getContactsList,
-  getContactById,
-  deleteContact,
-  createContact,
-  updateContact,
-  updateStatusContact,
-};

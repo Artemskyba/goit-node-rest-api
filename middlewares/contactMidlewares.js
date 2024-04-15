@@ -1,12 +1,12 @@
-const asyncHandler = require("express-async-handler");
-const { isValidObjectId } = require("mongoose");
-const {
+import asyncHandler from "express-async-handler";
+import { isValidObjectId } from "mongoose";
+import {
   getOneById,
   createNew,
   updateData,
-} = require("../services/contactsServices");
+} from "../services/contactsServices.js";
 
-const validateUserId = asyncHandler(async (req, res, next) => {
+export const validateUserId = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   if (!isValidObjectId(id))
     res.status(400).json({
@@ -24,7 +24,7 @@ const validateUserId = asyncHandler(async (req, res, next) => {
   next();
 });
 
-const joiValidateDataMiddleware = (JoiSchema) => {
+export const joiValidateDataMiddleware = (JoiSchema) => {
   return (req, res, next) => {
     const { error } = JoiSchema.validate(req.body);
     if (error) {
@@ -38,19 +38,21 @@ const joiValidateDataMiddleware = (JoiSchema) => {
   };
 };
 
-const validateCreateDataMiddleware = asyncHandler(async (req, res, next) => {
-  const { name, favorite } = req.body;
-  if (!name || !favorite) {
-    res.status(400);
-    throw new Error("Please provide all required fields (name and favorite");
+export const validateCreateDataMiddleware = asyncHandler(
+  async (req, res, next) => {
+    const { name, favorite } = req.body;
+    if (!name || !favorite) {
+      res.status(400);
+      throw new Error("Please provide all required fields (name and favorite");
+    }
+
+    const newContact = await createNew(req.body);
+    req.contact = newContact;
+    next();
   }
+);
 
-  const newContact = await createNew(req.body);
-  req.contact = newContact;
-  next();
-});
-
-const updateContactMiddleware = asyncHandler(async (req, res, next) => {
+export const updateContactMiddleware = asyncHandler(async (req, res, next) => {
   const {
     params: { id },
     body,
@@ -60,10 +62,3 @@ const updateContactMiddleware = asyncHandler(async (req, res, next) => {
   req.contact = updatedContact;
   next();
 });
-
-module.exports = {
-  validateUserId,
-  joiValidateDataMiddleware,
-  validateCreateDataMiddleware,
-  updateContactMiddleware,
-};

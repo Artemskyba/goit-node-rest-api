@@ -1,25 +1,25 @@
-const { Router } = require("express");
-const {
+import { Router } from "express";
+import {
   validateUserId,
   joiValidateDataMiddleware,
   validateCreateDataMiddleware,
   updateContactMiddleware,
-} = require("../middlewares/contactMidlewares.js");
+} from "../middlewares/contactMidlewares.js";
 
-const {
+import {
   contactJoiSchema,
   updateJoiSchema,
   updateStatusJoiSchema,
-} = require("../schemas/contactsJoiSchema.js");
+} from "../schemas/contactsJoiSchema.js";
 
-const {
+import {
   getContactsList,
   getContactById,
   deleteContact,
   createContact,
   updateContact,
   updateStatusContact,
-} = require("../controllers/contactsControllers.js");
+} from "../controllers/contactsControllers.js";
 
 const router = Router();
 
@@ -52,4 +52,4 @@ router
     updateStatusContact
   );
 
-module.exports = router;
+export default router;

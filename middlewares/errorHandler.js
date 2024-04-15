@@ -1,4 +1,4 @@
-module.exports = (error, req, res, next) => {
+export default (error, req, res, next) => {
   const statusCode = res.statusCode || res.code || res.status || 500;
   res.status(statusCode).json({
     code: statusCode,

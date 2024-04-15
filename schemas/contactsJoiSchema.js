@@ -1,6 +1,6 @@
-const Joi = require("joi");
+import Joi from "joi";
 
-const contactJoiSchema = Joi.object({
+export const contactJoiSchema = Joi.object({
   name: Joi.string().max(30).required(),
   email: Joi.string()
     .email({
@@ -14,7 +14,7 @@ const contactJoiSchema = Joi.object({
   favorite: Joi.boolean(),
 });
 
-const updateJoiSchema = Joi.object({
+export const updateJoiSchema = Joi.object({
   name: Joi.string().max(30),
   email: Joi.string().email({
     minDomainSegments: 2,
@@ -23,8 +23,6 @@ const updateJoiSchema = Joi.object({
   phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
 });
 
-const updateStatusJoiSchema = Joi.object({
+export const updateStatusJoiSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
-
-module.exports = { contactJoiSchema, updateJoiSchema, updateStatusJoiSchema };

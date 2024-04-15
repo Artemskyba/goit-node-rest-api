@@ -3,6 +3,7 @@
   "scripts": {
     "start": "nodemon ./app.js"
   },
+  "type": "module",
   "dependencies": {
     "colors": "^1.4.0",
     "cors": "^2.8.5",
