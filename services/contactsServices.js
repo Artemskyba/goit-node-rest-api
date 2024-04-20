@@ -9,6 +9,9 @@ export const deleteById = async (id) =>
 
 export const createNew = async (data) => await ContactModel.create({ ...data });
 
+export const checkContactExistsService = (filter) =>
+  ContactModel.exists(filter);
+
 export const updateData = async (id, data) =>
   await ContactModel.findByIdAndUpdate(
     id,

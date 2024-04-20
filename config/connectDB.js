@@ -1,5 +1,5 @@
 import "dotenv/config";
-const { MONGODB_URL } = process.env;
+const { MONGODB_URL, JWT_EXPRESS_IN } = process.env;
 import { connect } from "mongoose";
 import "colors";
 const connectDB = async () => {

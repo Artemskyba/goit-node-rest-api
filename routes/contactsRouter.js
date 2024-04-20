@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
-  validateUserId,
-  joiValidateDataMiddleware,
+  validateContactId,
   validateCreateDataMiddleware,
   updateContactMiddleware,
 } from "../middlewares/contactMidlewares.js";
@@ -21,7 +20,12 @@ import {
   updateStatusContact,
 } from "../controllers/contactsControllers.js";
 
+import { joiValidateDataMiddleware } from "../middlewares/joiValidateMiddleware.js";
+import { protection } from "../middlewares/userMiddlewares.js";
+
 const router = Router();
+
+router.use("/", protection);
 
 router
   .route("/")
@@ -32,7 +36,7 @@ router
     createContact
   );
 
-router.use("/:id", validateUserId);
+router.use("/:id", validateContactId);
 
 router
   .route("/:id")
