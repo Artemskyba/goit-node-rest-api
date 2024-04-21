@@ -19,6 +19,12 @@ export const validateContactId = expressAsyncHandler(async (req, res, next) => {
   next();
 });
 
+export const validateOwner = (req, res, next) => {
+  if (req.user.id !== req.contact.owner.toString())
+    throw new HttpError(401, "Not authorized");
+  next();
+};
+
 export const validateCreateDataMiddleware = expressAsyncHandler(
   async (req, res, next) => {
     const { name, favorite, email } = req.body;
@@ -31,7 +37,7 @@ export const validateCreateDataMiddleware = expressAsyncHandler(
     const isContactExist = await checkContactExistsService({ email: email });
     if (isContactExist) throw new HttpError(409, `Email in use`);
 
-    const newContact = await createNew(req.body);
+    const newContact = await createNew(req.body, req.user.id);
     req.contact = newContact;
     next();
   }

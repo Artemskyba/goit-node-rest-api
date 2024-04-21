@@ -19,8 +19,8 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: false }));
 
-app.use("/api/contacts", contactRouter);
-app.use("/api/users", userRouter);
+app.use("/contacts", contactRouter);
+app.use("/users", userRouter);
 
 app.use("*", routeNotFound);
 

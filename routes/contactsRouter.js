@@ -3,6 +3,7 @@ import {
   validateContactId,
   validateCreateDataMiddleware,
   updateContactMiddleware,
+  validateOwner,
 } from "../middlewares/contactMidlewares.js";
 
 import {
@@ -36,7 +37,7 @@ router
     createContact
   );
 
-router.use("/:id", validateContactId);
+router.use("/:id", validateContactId, validateOwner);
 
 router
   .route("/:id")

@@ -44,6 +44,7 @@ export const loginCheckData = expressAsyncHandler(async (req, res, next) => {
 
 export const protection = expressAsyncHandler(async (req, res, next) => {
   const { authorization } = req.headers;
+  if (!authorization) throw new HttpError(401, "Not authorized");
 
   const token = authorization.split(" ")[1];
   const userId = tokenValidation(token);
