@@ -27,12 +27,8 @@ export const validateOwner = (req, res, next) => {
 
 export const validateCreateDataMiddleware = expressAsyncHandler(
   async (req, res, next) => {
-    const { name, favorite, email } = req.body;
-    if (!name || !favorite)
-      throw new HttpError(
-        400,
-        "Please provide all required fields (name and favorite)"
-      );
+    const { name, email } = req.body;
+    if (!name) throw new HttpError(400, "Name is required)");
 
     const isContactExist = await checkContactExistsService({ email: email });
     if (isContactExist) throw new HttpError(409, `Email in use`);
