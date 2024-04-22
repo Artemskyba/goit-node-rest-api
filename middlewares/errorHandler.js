@@ -1,7 +1,6 @@
 export default (error, req, res, next) => {
-  const statusCode = res.statusCode || res.code || res.status || 500;
-  res.status(statusCode).json({
-    code: statusCode,
-    stack: error.stack,
+  res.status(error.status ?? 500).json({
+    message: error.message,
+    // stack: error.stack,
   });
 };

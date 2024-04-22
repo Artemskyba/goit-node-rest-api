@@ -1,64 +1,53 @@
-import asyncHandler from "express-async-handler";
+import expressAsyncHandler from "express-async-handler";
 import { isValidObjectId } from "mongoose";
 import {
   getOneById,
   createNew,
   updateData,
+  checkContactExistsService,
 } from "../services/contactsServices.js";
+import { HttpError } from "../utils/httpError.js";
 
-export const validateUserId = asyncHandler(async (req, res, next) => {
+export const validateContactId = expressAsyncHandler(async (req, res, next) => {
   const { id } = req.params;
   if (!isValidObjectId(id))
-    res.status(400).json({
-      code: 400,
-      message: `User with ID ${id} not found...`,
-    });
+    throw new HttpError(400, `Contact with ID ${id} not found...`);
 
   const contact = await getOneById(id);
-  if (!contact)
-    res.status(400).json({
-      code: 400,
-      message: `User with ID ${id} not found...`,
-    });
+  if (!contact) throw new HttpError(400, `Contact with ID ${id} not found...`);
   req.contact = contact;
   next();
 });
 
-export const joiValidateDataMiddleware = (JoiSchema) => {
-  return (req, res, next) => {
-    const { error } = JoiSchema.validate(req.body);
-    if (error) {
-      const message = `Joi validator: ${error.details[0].message}`;
-      res.status(400).json({
-        code: 400,
-        message,
-      });
-    }
-    next();
-  };
+export const validateOwner = (req, res, next) => {
+  if (req.user.id !== req.contact.owner.toString())
+    throw new HttpError(401, "Not authorized");
+  next();
 };
 
-export const validateCreateDataMiddleware = asyncHandler(
+export const validateCreateDataMiddleware = expressAsyncHandler(
   async (req, res, next) => {
-    const { name, favorite } = req.body;
-    if (!name || !favorite) {
-      res.status(400);
-      throw new Error("Please provide all required fields (name and favorite");
-    }
+    const { name, email } = req.body;
+    if (!name) throw new HttpError(400, "Name is required)");
 
-    const newContact = await createNew(req.body);
+    const isContactExist = await checkContactExistsService({ email: email });
+    if (isContactExist) throw new HttpError(409, `Email in use`);
+
+    const newContact = await createNew(req.body, req.user.id);
     req.contact = newContact;
     next();
   }
 );
 
-export const updateContactMiddleware = asyncHandler(async (req, res, next) => {
-  const {
-    params: { id },
-    body,
-  } = req;
+export const updateContactMiddleware = expressAsyncHandler(
+  async (req, res, next) => {
+    const {
+      params: { id },
+      body,
+    } = req;
 
-  const updatedContact = await updateData(id, body);
-  req.contact = updatedContact;
-  next();
-});
+    const updatedContact = await updateData(id, body);
+    req.contact = updatedContact;
+    next();
+  }
+);
