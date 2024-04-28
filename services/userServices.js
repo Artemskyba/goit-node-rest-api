@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { createToken } from "./jwtService.js";
 import { HttpError } from "../utils/httpError.js";
 import expressAsyncHandler from "express-async-handler";
+import { jimpService } from "./jimpService.js";
 
 export const checkUserExistsService = async (filter) =>
   await User.exists(filter);
@@ -56,4 +57,20 @@ export const logoutService = expressAsyncHandler(async (id) => {
     { new: true }
   );
   return newUser;
+});
+
+export const updateAvatarService = expressAsyncHandler(async (user, file) => {
+  if (file) {
+    user.avatarURL = file.path.replace("public", "");
+  }
+
+  const newAvatarURL = await jimpService(user);
+  user.avatarURL = newAvatarURL;
+
+  const userWithUpdatedAvatar = await User.findByIdAndUpdate(
+    user.id,
+    { ...user },
+    { runValidators: true, new: true }
+  );
+  return userWithUpdatedAvatar;
 });
