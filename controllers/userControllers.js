@@ -28,3 +28,7 @@ export const getCurrent = (req, res) => {
     subscription,
   });
 };
+
+export const updateAvatar = (req, res) => {
+  res.status(400).json({ avatarURL: req.user.avatarURL });
+};

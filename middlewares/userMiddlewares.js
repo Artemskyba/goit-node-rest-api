@@ -1,14 +1,17 @@
 import expressAsyncHandler from "express-async-handler";
+import gravatar from "gravatar";
 import {
   checkUserExistsService,
   findUserService,
   loginService,
   logoutService,
+  updateAvatarService,
 } from "../services/userServices.js";
 import { hashPassword, registerUserService } from "../services/userServices.js";
-import "colors";
 import { HttpError } from "../utils/httpError.js";
 import { tokenValidation } from "../services/jwtService.js";
+import multer from "multer";
+import { multerFilter, multerStogage } from "../services/multerService.js";
 
 export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -24,6 +27,12 @@ export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
 
   const hash = await hashPassword(password);
   req.body.password = hash;
+
+  const avatar = gravatar.url(email, {
+    d: "monsterid",
+  });
+
+  req.body.avatarURL = avatar;
 
   const newUser = await registerUserService(req.body);
   if (!newUser) throw new HttpError(500, "Something went wrong");
@@ -60,3 +69,23 @@ export const logoutMiddleware = expressAsyncHandler(async (req, res, next) => {
   req.user = await logoutService(id);
   next();
 });
+
+export const uploadAvatar = multer({
+  storage: multerStogage,
+  filter: multerFilter,
+  limits: {
+    fieldSize: 3 * 1024 * 1024,
+  },
+}).single("avatar");
+
+export const updateAvatarMiddleware = expressAsyncHandler(
+  async (req, res, next) => {
+    const { user, file } = req;
+
+    if (!file) throw new HttpError(400, "Please upload image");
+
+    const userWithUpdatedAvatar = await updateAvatarService(user, file);
+    req.user = userWithUpdatedAvatar;
+    next();
+  }
+);

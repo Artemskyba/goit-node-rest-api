@@ -2,10 +2,10 @@ import "colors";
 import express, { json, urlencoded } from "express";
 import morgan from "morgan";
 import cors from "cors";
+
 import connectDB from "./config/connectDB.js";
 import contactRouter from "./routes/contactsRouter.js";
 import userRouter from "./routes/userRouter.js";
-
 import errorHandler from "./middlewares/errorHandler.js";
 import routeNotFound from "./middlewares/routeNotFound.js";
 import "dotenv/config";
@@ -18,6 +18,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: false }));
+app.use(express.static("public"));
 
 app.use("/api/contacts", contactRouter);
 app.use("/users", userRouter);

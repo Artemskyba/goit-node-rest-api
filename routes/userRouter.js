@@ -7,6 +7,7 @@ import {
   loginUser,
   logout,
   registerUser,
+  updateAvatar,
 } from "../controllers/userControllers.js";
 
 import {
@@ -14,6 +15,8 @@ import {
   logoutMiddleware,
   protection,
   registerCheckData,
+  updateAvatarMiddleware,
+  uploadAvatar,
 } from "../middlewares/userMiddlewares.js";
 
 const router = Router();
@@ -35,5 +38,13 @@ router.post(
 router.post("/logout", protection, logoutMiddleware, logout);
 
 router.get("/current", protection, getCurrent);
+
+router.patch(
+  "/avatars",
+  protection,
+  uploadAvatar,
+  updateAvatarMiddleware,
+  updateAvatar
+);
 
 export default router;
