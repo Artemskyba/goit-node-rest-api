@@ -1,17 +1,21 @@
 import expressAsyncHandler from "express-async-handler";
 import gravatar from "gravatar";
+import { v4 } from "uuid";
 import {
+  checkResendingEmailDataService,
   checkUserExistsService,
   findUserService,
   loginService,
   logoutService,
   updateAvatarService,
+  verificationService,
 } from "../services/userServices.js";
 import { hashPassword, registerUserService } from "../services/userServices.js";
 import { HttpError } from "../utils/httpError.js";
-import { tokenValidation } from "../services/jwtService.js";
+import { createToken, tokenValidation } from "../services/jwtService.js";
 import multer from "multer";
 import { multerFilter, multerStogage } from "../services/multerService.js";
+import { nodemailerService } from "../services/nodemailerService.js";
 
 export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
@@ -34,6 +38,13 @@ export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
 
   req.body.avatarURL = avatar;
 
+  const verificationToken = createToken(v4());
+
+  const sendedEmail = await nodemailerService(verificationToken, email);
+  if (!sendedEmail) throw new HttpError(500, "Oops, something went wrong :(");
+
+  req.body.verificationToken = verificationToken;
+
   const newUser = await registerUserService(req.body);
   if (!newUser) throw new HttpError(500, "Something went wrong");
 
@@ -41,6 +52,30 @@ export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
   req.user = newUser;
   next();
 });
+
+export const verificationMiddleware = expressAsyncHandler(
+  async (req, res, next) => {
+    const { verificationToken } = req.params;
+    await verificationService({ verificationToken: verificationToken });
+    next();
+  }
+);
+
+export const resendingEmailMiddleware = expressAsyncHandler(
+  async (req, res, next) => {
+    const { email } = req.body;
+
+    if (!email) throw new HttpError(400, "Missing required field email");
+
+    const verificationToken = await checkResendingEmailDataService({
+      email: email,
+    });
+
+    const sendedEmail = await nodemailerService(verificationToken, email);
+    if (!sendedEmail) throw new HttpError(500, "Oops, something went wrong :(");
+    next();
+  }
+);
 
 export const loginCheckData = expressAsyncHandler(async (req, res, next) => {
   const { email, password } = req.body;

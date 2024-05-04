@@ -7,6 +7,18 @@ export const registerUser = expressAsyncHandler(async (req, res) => {
   });
 });
 
+export const verification = expressAsyncHandler(async (req, res) => {
+  res.status(200).json({
+    message: "Verification sucsessful",
+  });
+});
+
+export const resendingEmail = expressAsyncHandler(async (req, res) => {
+  res.status(200).json({
+    message: "Verification email sent",
+  });
+});
+
 export const loginUser = expressAsyncHandler(async (req, res) => {
   const { token, user } = req.user;
 

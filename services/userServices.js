@@ -1,5 +1,5 @@
-import { User } from "../models/User.js";
 import "dotenv/config";
+import { User } from "../models/User.js";
 const { GEN_SALT_NUMBER } = process.env;
 import bcrypt from "bcrypt";
 import { createToken } from "./jwtService.js";
@@ -22,9 +22,32 @@ export const hashPassword = async (data) => {
   return hash;
 };
 
+export const verificationService = async (verificationToken) => {
+  const user = await User.findOneAndUpdate(verificationToken, {
+    verificationToken: null,
+    verify: true,
+  });
+
+  if (!user) throw new HttpError(404, "User not found");
+};
+
+export const checkResendingEmailDataService = async (email) => {
+  const user = await User.findOne(email);
+
+  if (!user) throw new HttpError(404, "User not found ");
+
+  if (user.verify === true)
+    throw new HttpError(400, "Verification has already been passed");
+
+  return user.verificationToken;
+};
+
 export const loginService = async (email, password) => {
   const user = await User.findOne(email);
   if (!user) throw new HttpError(401, "Email or password is wrong");
+
+  if (user.verify !== true)
+    throw new HttpError(401, "Please, verificate your email");
 
   const isValidPassword = await bcrypt.compare(password, user.password);
   if (!isValidPassword) throw new HttpError(401, "Email or password is wrong");
@@ -34,7 +57,7 @@ export const loginService = async (email, password) => {
     email,
     { token: token },
     { new: true }
-  ).select("-_id -token -password");
+  ).select("-_id -token -password -avatarURL -verify -verificationToken");
   return {
     token,
     user: newUser,

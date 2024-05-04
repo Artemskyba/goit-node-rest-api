@@ -1,13 +1,19 @@
 import { Router } from "express";
 import { joiValidateDataMiddleware } from "../middlewares/joiValidateMiddleware.js";
-import { loginJoiSchema, registerJoiSchema } from "../schemas/userJoiSchema.js";
+import {
+  emailJoiSchema,
+  loginJoiSchema,
+  registerJoiSchema,
+} from "../schemas/userJoiSchema.js";
 
 import {
   getCurrent,
   loginUser,
   logout,
   registerUser,
+  resendingEmail,
   updateAvatar,
+  verification,
 } from "../controllers/userControllers.js";
 
 import {
@@ -15,8 +21,10 @@ import {
   logoutMiddleware,
   protection,
   registerCheckData,
+  resendingEmailMiddleware,
   updateAvatarMiddleware,
   uploadAvatar,
+  verificationMiddleware,
 } from "../middlewares/userMiddlewares.js";
 
 const router = Router();
@@ -26,6 +34,15 @@ router.post(
   joiValidateDataMiddleware(registerJoiSchema),
   registerCheckData,
   registerUser
+);
+
+router.get("/verify/:verificationToken", verificationMiddleware, verification);
+
+router.post(
+  "/verify",
+  joiValidateDataMiddleware(emailJoiSchema),
+  resendingEmailMiddleware,
+  resendingEmail
 );
 
 router.post(

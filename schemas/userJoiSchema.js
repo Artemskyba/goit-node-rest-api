@@ -5,7 +5,7 @@ export const registerJoiSchema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
+      tlds: { deny: ["ru", "su"] },
     })
     .required(),
   subscription: Joi.string().valid("starter", "pro", "business"),
@@ -17,7 +17,14 @@ export const loginJoiSchema = Joi.object({
   email: Joi.string()
     .email({
       minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
+      tlds: { deny: ["ru", "su"] },
     })
     .required(),
+});
+
+export const emailJoiSchema = Joi.object({
+  email: Joi.string().email({
+    minDomainSegments: 2,
+    tlds: { deny: ["ru", "su"] },
+  }),
 });
