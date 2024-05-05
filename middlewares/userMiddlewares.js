@@ -12,7 +12,7 @@ import {
 } from "../services/userServices.js";
 import { hashPassword, registerUserService } from "../services/userServices.js";
 import { HttpError } from "../utils/httpError.js";
-import { createToken, tokenValidation } from "../services/jwtService.js";
+import { tokenValidation } from "../services/jwtService.js";
 import multer from "multer";
 import { multerFilter, multerStogage } from "../services/multerService.js";
 import { nodemailerService } from "../services/nodemailerService.js";
@@ -38,7 +38,7 @@ export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
 
   req.body.avatarURL = avatar;
 
-  const verificationToken = createToken(v4());
+  const verificationToken = v4();
 
   const sendedEmail = await nodemailerService(verificationToken, email);
   if (!sendedEmail) throw new HttpError(500, "Oops, something went wrong :(");
@@ -48,7 +48,6 @@ export const registerCheckData = expressAsyncHandler(async (req, res, next) => {
   const newUser = await registerUserService(req.body);
   if (!newUser) throw new HttpError(500, "Something went wrong");
 
-  newUser.password = undefined;
   req.user = newUser;
   next();
 });

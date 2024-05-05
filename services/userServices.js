@@ -12,8 +12,8 @@ export const checkUserExistsService = async (filter) =>
 
 export const registerUserService = async (data) => {
   const user = await User.create(data);
-  const { _id, token, ...anyUserData } = user.toObject();
-  return anyUserData;
+  const { email, subscription, avatarURL } = user;
+  return { email, subscription, avatarURL };
 };
 
 export const hashPassword = async (data) => {
