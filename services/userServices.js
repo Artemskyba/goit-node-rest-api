@@ -6,20 +6,56 @@ import { createToken } from "./jwtService.js";
 import { HttpError } from "../utils/httpError.js";
 import expressAsyncHandler from "express-async-handler";
 import { jimpService } from "./jimpService.js";
+import gravatar from "gravatar";
+import { v4 } from "uuid";
+import { nodemailerService } from "./nodemailerService.js";
+
+export const registerUserService = async (body) => {
+  const { email, password } = body;
+
+  if (!email || !password)
+    throw new HttpError(
+      400,
+      "Please provide all required fields (email and password)"
+    );
+
+  const isUserExist = await checkUserExistsService({ email: email });
+  if (isUserExist) throw new HttpError(409, `Email in use`);
+
+  const hash = await hashPassword(password);
+  body.password = hash;
+
+  const avatar = gravatar.url(email, {
+    d: "monsterid",
+  });
+  body.avatarURL = avatar;
+
+  const verificationToken = v4();
+
+  const sendedEmail = await nodemailerService(verificationToken, email);
+  if (!sendedEmail) throw new HttpError(500, "Oops, something went wrong :(");
+
+  body.verificationToken = verificationToken;
+
+  const user = await createUserService(body);
+  if (!user) throw new HttpError(500, "Something went wrong");
+
+  return user;
+};
 
 export const checkUserExistsService = async (filter) =>
   await User.exists(filter);
-
-export const registerUserService = async (data) => {
-  const user = await User.create(data);
-  const { email, subscription, avatarURL } = user;
-  return { email, subscription, avatarURL };
-};
 
 export const hashPassword = async (data) => {
   const salt = await bcrypt.genSalt(+GEN_SALT_NUMBER);
   const hash = bcrypt.hash(data, salt);
   return hash;
+};
+
+export const createUserService = async (data) => {
+  const user = await User.create(data);
+  const { email, subscription, avatarURL } = user;
+  return { email, subscription, avatarURL };
 };
 
 export const verificationService = async (verificationToken) => {
@@ -31,15 +67,18 @@ export const verificationService = async (verificationToken) => {
   if (!user) throw new HttpError(404, "User not found");
 };
 
-export const checkResendingEmailDataService = async (email) => {
-  const user = await User.findOne(email);
+export const resendingEmailService = async (filter) => {
+  const user = await User.findOne(filter);
 
   if (!user) throw new HttpError(404, "User not found ");
 
   if (user.verify === true)
     throw new HttpError(400, "Verification has already been passed");
 
-  return user.verificationToken;
+  const { verificationToken, email } = user;
+
+  const sendedEmail = await nodemailerService(verificationToken, email);
+  if (!sendedEmail) throw new HttpError(500, "Oops, something went wrong :(");
 };
 
 export const loginService = async (email, password) => {
@@ -88,12 +127,12 @@ export const updateAvatarService = expressAsyncHandler(async (user, file) => {
   }
 
   const newAvatarURL = await jimpService(user);
-  user.avatarURL = newAvatarURL;
 
-  const userWithUpdatedAvatar = await User.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     user.id,
-    { ...user },
+    { avatarURL: newAvatarURL },
     { runValidators: true, new: true }
   );
-  return userWithUpdatedAvatar;
+
+  return newAvatarURL;
 });

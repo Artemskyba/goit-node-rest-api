@@ -1,26 +1,42 @@
 import expressAsyncHandler from "express-async-handler";
+import {
+  loginService,
+  logoutService,
+  registerUserService,
+  resendingEmailService,
+  updateAvatarService,
+  verificationService,
+} from "../services/userServices.js";
 
 export const registerUser = expressAsyncHandler(async (req, res) => {
-  const { user } = req;
+  const userr = await registerUserService(req.body);
+
   res.status(201).json({
     user,
   });
 });
 
 export const verification = expressAsyncHandler(async (req, res) => {
+  const { verificationToken } = req.params;
+  await verificationService({ verificationToken: verificationToken });
+
   res.status(200).json({
     message: "Verification sucsessful",
   });
 });
 
 export const resendingEmail = expressAsyncHandler(async (req, res) => {
+  const { email } = req.body;
+  await resendingEmailService({ email: email });
+
   res.status(200).json({
     message: "Verification email sent",
   });
 });
 
 export const loginUser = expressAsyncHandler(async (req, res) => {
-  const { token, user } = req.user;
+  const { email, password } = req.body;
+  const { token, user } = await loginService({ email: email }, password);
 
   res.status(200).json({
     token,
@@ -29,6 +45,9 @@ export const loginUser = expressAsyncHandler(async (req, res) => {
 });
 
 export const logout = expressAsyncHandler(async (req, res) => {
+  const { id } = req.user;
+  await logoutService(id);
+
   res.sendStatus(204);
 });
 
@@ -41,6 +60,9 @@ export const getCurrent = (req, res) => {
   });
 };
 
-export const updateAvatar = (req, res) => {
-  res.status(400).json({ avatarURL: req.user.avatarURL });
-};
+export const updateAvatar = expressAsyncHandler(async (req, res) => {
+  const { user, file } = req;
+  const avatarURL = await updateAvatarService(user, file);
+
+  res.status(400).json({ avatarURL });
+});

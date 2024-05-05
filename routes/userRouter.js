@@ -17,14 +17,10 @@ import {
 } from "../controllers/userControllers.js";
 
 import {
-  loginCheckData,
-  logoutMiddleware,
+  checkExistFile,
+  checkRequiredEmail,
   protection,
-  registerCheckData,
-  resendingEmailMiddleware,
-  updateAvatarMiddleware,
   uploadAvatar,
-  verificationMiddleware,
 } from "../middlewares/userMiddlewares.js";
 
 const router = Router();
@@ -32,27 +28,21 @@ const router = Router();
 router.post(
   "/register",
   joiValidateDataMiddleware(registerJoiSchema),
-  registerCheckData,
   registerUser
 );
 
-router.get("/verify/:verificationToken", verificationMiddleware, verification);
+router.get("/verify/:verificationToken", verification);
 
 router.post(
   "/verify",
   joiValidateDataMiddleware(emailJoiSchema),
-  resendingEmailMiddleware,
+  checkRequiredEmail,
   resendingEmail
 );
 
-router.post(
-  "/login",
-  joiValidateDataMiddleware(loginJoiSchema),
-  loginCheckData,
-  loginUser
-);
+router.post("/login", joiValidateDataMiddleware(loginJoiSchema), loginUser);
 
-router.post("/logout", protection, logoutMiddleware, logout);
+router.post("/logout", protection, logout);
 
 router.get("/current", protection, getCurrent);
 
@@ -60,7 +50,7 @@ router.patch(
   "/avatars",
   protection,
   uploadAvatar,
-  updateAvatarMiddleware,
+  checkExistFile,
   updateAvatar
 );
 
