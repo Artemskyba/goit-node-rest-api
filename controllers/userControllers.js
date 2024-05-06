@@ -9,7 +9,7 @@ import {
 } from "../services/userServices.js";
 
 export const registerUser = expressAsyncHandler(async (req, res) => {
-  const userr = await registerUserService(req.body);
+  const user = await registerUserService(req.body);
 
   res.status(201).json({
     user,
